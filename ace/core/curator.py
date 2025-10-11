@@ -11,9 +11,9 @@ class Curator:
     quality and integrity of the playbook.
     """
 
-    def curate(self, playbook: Playbook, insights: List[Dict[str, any]]):
+    async def curate(self, playbook: Playbook, insights: List[Dict[str, any]]):
         """
-        Integrates a list of insights into the playbook, avoiding duplicates.
+        Asynchronously integrates a list of insights into the playbook, avoiding duplicates.
 
         This method iterates through a list of insights and adds them to the
         playbook, but only if an entry with the same content does not already
@@ -26,8 +26,8 @@ class Curator:
         """
         for insight in insights:
             content = insight.get("content", "")
-            if content and not database.content_exists(content):
-                playbook.add_entry(
+            if content and not await database.content_exists(content):
+                await playbook.add_entry(
                     content=content,
                     metadata=insight.get("metadata", {})
                 )

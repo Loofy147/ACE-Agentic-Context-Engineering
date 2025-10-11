@@ -29,12 +29,16 @@ class Playbook:
     dynamically updated by the Curator.
     """
     def __init__(self):
-        """Initializes the playbook by ensuring the database is set up."""
-        database.initialize_database()
-
-    def add_entry(self, content: str, metadata: Optional[Dict[str, any]] = None) -> PlaybookEntry:
         """
-        Adds a new entry to the playbook database.
+        Initializes the playbook.
+
+        Note: The database itself should be initialized separately at application startup.
+        """
+        pass
+
+    async def add_entry(self, content: str, metadata: Optional[Dict[str, any]] = None) -> PlaybookEntry:
+        """
+        Asynchronously adds a new entry to the playbook database.
 
         Args:
             content: The content of the new entry.
@@ -46,20 +50,20 @@ class Playbook:
         if metadata is None:
             metadata = {}
         entry = PlaybookEntry(content=content, metadata=metadata)
-        database.add_playbook_entry(entry.id, entry.content, entry.metadata)
+        await database.add_playbook_entry(entry.id, entry.content, entry.metadata)
         return entry
 
-    def get_all_entries(self) -> List[PlaybookEntry]:
+    async def get_all_entries(self) -> List[PlaybookEntry]:
         """
-        Retrieves all entries from the playbook database.
+        Asynchronously retrieves all entries from the playbook database.
 
         Returns:
             A list of all PlaybookEntry objects from the database.
         """
-        all_entries_data = database.get_all_playbook_entries()
+        all_entries_data = await database.get_all_playbook_entries()
         return [PlaybookEntry(**data) for data in all_entries_data]
 
-    def get_entry(self, entry_id: str) -> Optional[PlaybookEntry]:
+    async def get_entry(self, entry_id: str) -> Optional[PlaybookEntry]:
         """
         Retrieves an entry from the playbook by its ID.
 

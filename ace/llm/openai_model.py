@@ -21,9 +21,9 @@ class OpenAILanguageModel(LanguageModel):
             raise ValueError("OpenAI API key not found in config.yaml")
         openai.api_key = self.api_key
 
-    def generate(self, prompt: str) -> str:
+    async def generate(self, prompt: str) -> str:
         """
-        Generates a response from the OpenAI API.
+        Asynchronously generates a response from the OpenAI API.
 
         NOTE: The actual API call is commented out to prevent execution in
               an environment without network access or a valid API key.
