@@ -65,7 +65,7 @@ class Playbook:
 
     async def get_entry(self, entry_id: str) -> Optional[PlaybookEntry]:
         """
-        Retrieves an entry from the playbook by its ID.
+        Asynchronously retrieves an entry from the playbook by its ID.
 
         Args:
             entry_id: The ID of the entry to retrieve.
@@ -73,7 +73,7 @@ class Playbook:
         Returns:
             The PlaybookEntry object if found, otherwise None.
         """
-        all_entries = self.get_all_entries()
+        all_entries = await self.get_all_entries()
         for entry in all_entries:
             if entry.id == entry_id:
                 return entry

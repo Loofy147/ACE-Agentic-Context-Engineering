@@ -106,6 +106,22 @@ if __name__ == "__main__":
     asyncio.run(run_ace_as_library())
 ```
 
+## Plugins
+
+The ACE framework includes a plugin system that allows you to extend its functionality without modifying the core code. Plugins can hook into various stages of the ACE pipeline to add logging, modify data, or trigger external events.
+
+### Creating a Plugin
+
+1.  Create a new Python file in the `ace/plugins/` directory.
+2.  Define a class that inherits from `ace.plugins.base.Plugin`.
+3.  Implement any of the asynchronous hook methods defined in the `Plugin` base class.
+
+The `PluginManager` will automatically discover and register any valid plugin classes in the `ace/plugins/` directory.
+
+### Example Plugin
+
+The `ace/plugins/logging_plugin.py` provides a simple example of a plugin that logs each stage of the pipeline.
+
 ## Next Steps: High-Tech Level
 
 This section outlines a high-level roadmap for the future development of the ACE framework.
@@ -118,8 +134,8 @@ This section outlines a high-level roadmap for the future development of the ACE
 
 ### Phase 2: Advanced Features
 
-- [ ] **Web Interface**: A basic FastAPI is implemented. Further enhancements can be added.
-- [ ] **Plugin Architecture**: Develop a plugin architecture to allow for custom components and extensions.
+- [x] **Web Interface**: A basic FastAPI is implemented. Further enhancements can be added.
+- [x] **Plugin Architecture**: A flexible plugin system has been implemented.
 - [ ] **Advanced Curation Strategies**: Implement more sophisticated curation strategies, such as clustering and summarization.
 
 ### Phase 3: Deployment and Scaling
