@@ -1,14 +1,22 @@
 import unittest
+import os
 from ace.core.models import Playbook
 from ace.core.curator import Curator
+from ace import database
 
 class TestCurator(unittest.TestCase):
     """Tests for the Curator component."""
 
     def setUp(self):
-        """Set up a new playbook and curator for each test."""
+        """Set up a clean database for each test."""
+        database.DATABASE_PATH = "test_playbook.db"
+        database.initialize_database()
         self.playbook = Playbook()
         self.curator = Curator()
+
+    def tearDown(self):
+        """Remove the test database after each test."""
+        os.remove(database.DATABASE_PATH)
 
     def test_deduplication(self):
         """Ensures the curator does not add duplicate insights."""
@@ -20,9 +28,10 @@ class TestCurator(unittest.TestCase):
 
         self.curator.curate(self.playbook, insights)
 
-        self.assertEqual(len(self.playbook.entries), 2)
-        self.assertEqual(self.playbook.entries[0].content, "Unique insight 1")
-        self.assertEqual(self.playbook.entries[1].content, "Unique insight 2")
+        all_entries = self.playbook.get_all_entries()
+        self.assertEqual(len(all_entries), 2)
+        self.assertEqual(all_entries[0].content, "Unique insight 1")
+        self.assertEqual(all_entries[1].content, "Unique insight 2")
 
     def test_empty_content(self):
         """Ensures the curator does not add insights with empty content."""
@@ -33,8 +42,9 @@ class TestCurator(unittest.TestCase):
 
         self.curator.curate(self.playbook, insights)
 
-        self.assertEqual(len(self.playbook.entries), 1)
-        self.assertEqual(self.playbook.entries[0].content, "A valid insight")
+        all_entries = self.playbook.get_all_entries()
+        self.assertEqual(len(all_entries), 1)
+        self.assertEqual(all_entries[0].content, "A valid insight")
 
 if __name__ == '__main__':
     unittest.main()
