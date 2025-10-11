@@ -8,6 +8,7 @@ from ace.core.generator import Generator
 from ace.core.reflector import Reflector
 from ace.core.curator import Curator
 from ace.llm import get_language_model
+from ace.plugins.manager import plugin_manager
 import yaml
 
 app = FastAPI(
@@ -42,6 +43,8 @@ async def get_playbook():
 @app.post("/run-ace/", response_model=RunAceResponse)
 async def run_ace(request: RunAceRequest):
     """Runs the full ACE pipeline for a given task."""
+    await plugin_manager.execute_hook("on_pipeline_start", task=request.task)
+
     with open("config.yaml", "r") as f:
         config = yaml.safe_load(f)
 
@@ -51,11 +54,21 @@ async def run_ace(request: RunAceRequest):
     reflector = Reflector(llm=llm)
     curator = Curator()
 
+    await plugin_manager.execute_hook("on_before_generation", playbook=playbook, task=request.task)
     trajectory = await generator.generate_trajectory(playbook, request.task)
+    await plugin_manager.execute_hook("on_after_generation", trajectory=trajectory)
+
+    await plugin_manager.execute_hook("on_before_reflection", trajectory=trajectory)
     insights = await reflector.reflect(trajectory)
+    await plugin_manager.execute_hook("on_after_reflection", insights=insights)
+
+    await plugin_manager.execute_hook("on_before_curation", insights=insights)
     await curator.curate(playbook, insights)
+    await plugin_manager.execute_hook("on_after_curation")
 
     all_entries = await playbook.get_all_entries()
+
+    await plugin_manager.execute_hook("on_pipeline_end")
 
     return RunAceResponse(
         new_insights=insights,

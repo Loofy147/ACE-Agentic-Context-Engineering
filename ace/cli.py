@@ -13,6 +13,7 @@ from ace.core.reflector import Reflector
 from ace.core.curator import Curator
 from ace.llm import get_language_model
 from ace import database
+from ace.plugins.manager import plugin_manager
 
 def load_config():
     """Loads the configuration from config.yaml."""
@@ -47,11 +48,23 @@ async def main():
     print(f"Running ACE pipeline for task: '{args.task}'\n")
 
     # Run the pipeline
+    await plugin_manager.execute_hook("on_pipeline_start", task=args.task)
+
+    await plugin_manager.execute_hook("on_before_generation", playbook=playbook, task=args.task)
     trajectory = await generator.generate_trajectory(playbook, args.task)
+    await plugin_manager.execute_hook("on_after_generation", trajectory=trajectory)
+
+    await plugin_manager.execute_hook("on_before_reflection", trajectory=trajectory)
     insights = await reflector.reflect(trajectory)
+    await plugin_manager.execute_hook("on_after_reflection", insights=insights)
+
+    await plugin_manager.execute_hook("on_before_curation", insights=insights)
     await curator.curate(playbook, insights)
+    await plugin_manager.execute_hook("on_after_curation")
 
     print("Pipeline complete. Updated playbook entries:")
+
+    await plugin_manager.execute_hook("on_pipeline_end")
     for entry in await playbook.get_all_entries():
         print(f"- {entry.content}")
 
