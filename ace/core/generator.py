@@ -1,4 +1,5 @@
 from ace.core.models import Playbook
+import random
 
 class Generator:
     """
@@ -9,16 +10,18 @@ class Generator:
     steps to be taken to address the task.
     """
 
-    def __init__(self, model: any):
+    def __init__(self, model: any, config: dict):
         """
-        Initializes the Generator with a language model.
+        Initializes the Generator with a language model and configuration.
 
         Args:
             model: The language model to use for generation. This is currently a
                    placeholder and should be replaced with a real language model
                    interface.
+            config: A dictionary containing the application configuration.
         """
         self.model = model
+        self.config = config
 
     def generate_trajectory(self, playbook: Playbook, task: str) -> str:
         """
@@ -26,7 +29,7 @@ class Generator:
 
         In a real implementation, this method would interact with a language model
         to generate a detailed, context-aware reasoning trajectory. The current
-        implementation simulates this process.
+        implementation simulates this by selecting a random response from the config.
 
         Args:
             playbook: The playbook to use as context for the language model.
@@ -42,13 +45,12 @@ class Generator:
         for entry in playbook.entries:
             prompt += f"- {entry.content}\n"
 
-        # Simulate a language model call by generating a more detailed trajectory.
-        trajectory = (
-            f"Based on the task '{task}', the following steps are recommended:\n"
-            f"1. Analyze the task requirements.\n"
-            f"2. Consult the playbook for relevant strategies.\n"
-            f"3. Formulate a plan of action.\n"
-            f"4. Execute the plan and document the results."
-        )
+        # Simulate a language model call by randomly selecting a response from the config.
+        responses = self.config.get('generator_responses', [])
+        if not responses:
+            return f"No generator responses found in config for task: {task}"
+
+        trajectory_template = random.choice(responses)
+        trajectory = trajectory_template.format(task=task)
 
         return trajectory

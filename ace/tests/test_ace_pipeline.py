@@ -1,4 +1,5 @@
 import unittest
+import yaml
 from ace.core.models import Playbook
 from ace.core.generator import Generator
 from ace.core.reflector import Reflector
@@ -12,13 +13,18 @@ class MockModel:
 class TestAcePipeline(unittest.TestCase):
     """Tests the full ACE pipeline."""
 
+    def setUp(self):
+        """Load the test configuration."""
+        with open("config.yaml", "r") as f:
+            self.config = yaml.safe_load(f)
+
     def test_pipeline(self):
         """Tests the integration of Generator, Reflector, and Curator."""
         # 1. Setup
         playbook = Playbook()
         mock_model = MockModel()
-        generator = Generator(model=mock_model)
-        reflector = Reflector(model=mock_model)
+        generator = Generator(model=mock_model, config=self.config)
+        reflector = Reflector(model=mock_model, config=self.config)
         curator = Curator()
 
         # 2. Initial state
@@ -31,7 +37,7 @@ class TestAcePipeline(unittest.TestCase):
         curator.curate(playbook, insights)
 
         # 4. Assert the final state
-        self.assertEqual(len(playbook.entries), 2)
+        self.assertEqual(len(playbook.entries), 3)
         entry1 = playbook.entries[0]
         self.assertIn("When analyzing task requirements", entry1.content)
         self.assertEqual(entry1.metadata["source"], "reflector")
