@@ -1,4 +1,6 @@
 from typing import Dict, List
+import json
+from ace.llm import LanguageModel
 
 class Reflector:
     """
@@ -9,26 +11,21 @@ class Reflector:
     Curator to update the playbook.
     """
 
-    def __init__(self, model: any, config: dict):
+    def __init__(self, llm: LanguageModel):
         """
-        Initializes the Reflector with a language model and configuration.
+        Initializes the Reflector with a language model.
 
         Args:
-            model: The language model to use for reflection. This is currently a
-                   placeholder and should be replaced with a real language model
-                   interface.
-            config: A dictionary containing the application configuration.
+            llm: An instance of a class that implements the LanguageModel interface.
         """
-        self.model = model
-        self.config = config
+        self.llm = llm
 
     def reflect(self, trajectory: str) -> List[Dict[str, any]]:
         """
         Analyzes a reasoning trajectory and extracts insights.
 
-        In a real implementation, this method would use a language model to
-        analyze the trajectory and extract structured insights. The current
-        implementation simulates this by returning insights from the config.
+        This method prompts the language model to extract structured insights
+        from a given trajectory.
 
         Args:
             trajectory: The reasoning trajectory to analyze.
@@ -37,11 +34,18 @@ class Reflector:
             A list of insights, where each insight is a dictionary containing
             'content' and 'metadata'.
         """
-        # This is a placeholder implementation.
-        # In a real implementation, this would use the language model
-        # to analyze the trajectory and extract structured insights.
+        prompt = (
+            f"Analyze the following trajectory and extract key insights. "
+            f"Return the insights as a JSON list of objects, where each object "
+            f"has 'content' and 'metadata' keys.\n\nTrajectory:\n{trajectory}"
+        )
 
-        # Simulate a language model call by returning insights from the config.
-        insights = self.config.get('reflector_insights', [])
+        response_text = self.llm.generate(prompt)
+
+        try:
+            insights = json.loads(response_text)
+        except json.JSONDecodeError:
+            # Handle cases where the LLM response is not valid JSON
+            insights = [{"content": response_text, "metadata": {"source": "reflector", "error": "invalid_json"}}]
 
         return insights

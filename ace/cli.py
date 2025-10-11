@@ -10,10 +10,7 @@ from ace.core.models import Playbook
 from ace.core.generator import Generator
 from ace.core.reflector import Reflector
 from ace.core.curator import Curator
-
-class MockModel:
-    """A mock model for the CLI."""
-    pass
+from ace.llm import get_language_model
 
 def load_config():
     """Loads the configuration from config.yaml."""
@@ -37,9 +34,9 @@ def main():
 
     # Initialize components
     playbook = Playbook()
-    mock_model = MockModel()
-    generator = Generator(model=mock_model, config=config)
-    reflector = Reflector(model=mock_model, config=config)
+    llm = get_language_model(config)
+    generator = Generator(llm=llm)
+    reflector = Reflector(llm=llm)
     curator = Curator()
 
     print(f"Running ACE pipeline for task: '{args.task}'\n")
