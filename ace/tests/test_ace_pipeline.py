@@ -31,10 +31,13 @@ class TestAcePipeline(unittest.TestCase):
         curator.curate(playbook, insights)
 
         # 4. Assert the final state
-        self.assertEqual(len(playbook.entries), 1)
-        entry = playbook.entries[0]
-        self.assertIn("Insight derived from trajectory", entry.content)
-        self.assertEqual(entry.metadata["source"], "reflector")
+        self.assertEqual(len(playbook.entries), 2)
+        entry1 = playbook.entries[0]
+        self.assertIn("When analyzing task requirements", entry1.content)
+        self.assertEqual(entry1.metadata["source"], "reflector")
+        entry2 = playbook.entries[1]
+        self.assertIn("Consulting the playbook", entry2.content)
+        self.assertEqual(entry2.metadata["source"], "reflector")
 
 if __name__ == '__main__':
     unittest.main()
