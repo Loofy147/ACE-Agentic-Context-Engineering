@@ -1,0 +1,18 @@
+# Configuration for the ACE Framework
+
+# Mock model responses for the Generator and Reflector
+generator_responses:
+  - "Based on the task '{task}', the following steps are recommended:\n1. Analyze the task requirements.\n2. Consult the playbook for relevant strategies.\n3. Formulate a plan of action.\n4. Execute the plan and document the results."
+  - "For the task '{task}', a different approach is to first break it down into smaller sub-tasks."
+
+reflector_insights:
+  - content: "When analyzing task requirements, it's crucial to identify the key objectives."
+    metadata: { "source": "reflector", "type": "strategy" }
+  - content: "Consulting the playbook can reveal effective strategies from past experiences."
+    metadata: { "source": "reflector", "type": "recommendation" }
+  - content: "Breaking down tasks into smaller sub-tasks is a good practice."
+    metadata: { "source": "reflector", "type": "strategy" }
+
+# Settings for the CLI
+cli_settings:
+  default_task: "Default task from config"
