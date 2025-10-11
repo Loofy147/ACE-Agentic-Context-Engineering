@@ -1,6 +1,7 @@
 import uuid
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
+from ace import database
 
 @dataclass
 class PlaybookEntry:
@@ -19,22 +20,21 @@ class PlaybookEntry:
     content: str = ""
     metadata: Dict[str, any] = field(default_factory=dict)
 
-@dataclass
 class Playbook:
     """
-    Represents the entire playbook, which is a collection of PlaybookEntry objects.
+    Represents the entire playbook, which is a collection of PlaybookEntry objects
+    stored in a persistent database.
 
     The playbook is the central knowledge base for the ACE framework. It is
     dynamically updated by the Curator.
-
-    Attributes:
-        entries: A list of PlaybookEntry objects.
     """
-    entries: List[PlaybookEntry] = field(default_factory=list)
+    def __init__(self):
+        """Initializes the playbook by ensuring the database is set up."""
+        database.initialize_database()
 
     def add_entry(self, content: str, metadata: Optional[Dict[str, any]] = None) -> PlaybookEntry:
         """
-        Adds a new entry to the playbook.
+        Adds a new entry to the playbook database.
 
         Args:
             content: The content of the new entry.
@@ -46,8 +46,18 @@ class Playbook:
         if metadata is None:
             metadata = {}
         entry = PlaybookEntry(content=content, metadata=metadata)
-        self.entries.append(entry)
+        database.add_playbook_entry(entry.id, entry.content, entry.metadata)
         return entry
+
+    def get_all_entries(self) -> List[PlaybookEntry]:
+        """
+        Retrieves all entries from the playbook database.
+
+        Returns:
+            A list of all PlaybookEntry objects from the database.
+        """
+        all_entries_data = database.get_all_playbook_entries()
+        return [PlaybookEntry(**data) for data in all_entries_data]
 
     def get_entry(self, entry_id: str) -> Optional[PlaybookEntry]:
         """
@@ -59,7 +69,8 @@ class Playbook:
         Returns:
             The PlaybookEntry object if found, otherwise None.
         """
-        for entry in self.entries:
+        all_entries = self.get_all_entries()
+        for entry in all_entries:
             if entry.id == entry_id:
                 return entry
         return None

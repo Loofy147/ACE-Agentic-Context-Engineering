@@ -42,7 +42,7 @@ class Generator:
         # In a real implementation, this would use the language model
         # to generate a trajectory based on the playbook and task.
         prompt = f"Task: {task}\n\nPlaybook:\n"
-        for entry in playbook.entries:
+        for entry in playbook.get_all_entries():
             prompt += f"- {entry.content}\n"
 
         # Simulate a language model call by randomly selecting a response from the config.

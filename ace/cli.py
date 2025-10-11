@@ -50,7 +50,7 @@ def main():
     curator.curate(playbook, insights)
 
     print("Pipeline complete. Updated playbook entries:")
-    for entry in playbook.entries:
+    for entry in playbook.get_all_entries():
         print(f"- {entry.content}")
 
 if __name__ == "__main__":
