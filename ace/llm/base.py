@@ -18,9 +18,9 @@ class LanguageModel(ABC):
         self.config = config
 
     @abstractmethod
-    def generate(self, prompt: str) -> str:
+    async def generate(self, prompt: str) -> str:
         """
-        Generates a response from the language model based on a prompt.
+        Asynchronously generates a response from the language model based on a prompt.
 
         Args:
             prompt: The prompt to send to the language model.

@@ -20,9 +20,9 @@ class Reflector:
         """
         self.llm = llm
 
-    def reflect(self, trajectory: str) -> List[Dict[str, any]]:
+    async def reflect(self, trajectory: str) -> List[Dict[str, any]]:
         """
-        Analyzes a reasoning trajectory and extracts insights.
+        Asynchronously analyzes a reasoning trajectory and extracts insights.
 
         This method prompts the language model to extract structured insights
         from a given trajectory.
@@ -40,7 +40,7 @@ class Reflector:
             f"has 'content' and 'metadata' keys.\n\nTrajectory:\n{trajectory}"
         )
 
-        response_text = self.llm.generate(prompt)
+        response_text = await self.llm.generate(prompt)
 
         try:
             insights = json.loads(response_text)

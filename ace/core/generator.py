@@ -19,9 +19,9 @@ class Generator:
         """
         self.llm = llm
 
-    def generate_trajectory(self, playbook: Playbook, task: str) -> str:
+    async def generate_trajectory(self, playbook: Playbook, task: str) -> str:
         """
-        Generates a reasoning trajectory for a given task.
+        Asynchronously generates a reasoning trajectory for a given task.
 
         This method constructs a prompt from the task and playbook, then uses
         the language model to generate a reasoning trajectory.
@@ -34,9 +34,9 @@ class Generator:
             A string representing the reasoning trajectory.
         """
         prompt = f"Task: {task}\n\nPlaybook:\n"
-        for entry in playbook.get_all_entries():
+        for entry in await playbook.get_all_entries():
             prompt += f"- {entry.content}\n"
 
-        trajectory = self.llm.generate(prompt)
+        trajectory = await self.llm.generate(prompt)
 
         return trajectory

@@ -6,9 +6,9 @@ class MockLanguageModel(LanguageModel):
     A mock language model that returns pre-defined responses from the config.
     """
 
-    def generate(self, prompt: str) -> str:
+    async def generate(self, prompt: str) -> str:
         """
-        Generates a mock response by randomly selecting from a list in the config.
+        Asynchronously generates a mock response by randomly selecting from a list in the config.
 
         Args:
             prompt: The prompt (ignored by the mock model).

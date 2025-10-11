@@ -2,6 +2,7 @@ import argparse
 import sys
 import os
 import yaml
+import asyncio
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -11,6 +12,7 @@ from ace.core.generator import Generator
 from ace.core.reflector import Reflector
 from ace.core.curator import Curator
 from ace.llm import get_language_model
+from ace import database
 
 def load_config():
     """Loads the configuration from config.yaml."""
@@ -24,9 +26,12 @@ def load_config():
         print(f"Error parsing config.yaml: {e}", file=sys.stderr)
         sys.exit(1)
 
-def main():
-    """Main function for the ACE CLI."""
+async def main():
+    """Main async function for the ACE CLI."""
     config = load_config()
+
+    # Initialize the database
+    await database.initialize_database()
 
     parser = argparse.ArgumentParser(description="ACE Framework CLI")
     parser.add_argument("task", type=str, nargs='?', default=config.get('cli_settings', {}).get('default_task'), help="The task to run the ACE pipeline on.")
@@ -42,13 +47,13 @@ def main():
     print(f"Running ACE pipeline for task: '{args.task}'\n")
 
     # Run the pipeline
-    trajectory = generator.generate_trajectory(playbook, args.task)
-    insights = reflector.reflect(trajectory)
-    curator.curate(playbook, insights)
+    trajectory = await generator.generate_trajectory(playbook, args.task)
+    insights = await reflector.reflect(trajectory)
+    await curator.curate(playbook, insights)
 
     print("Pipeline complete. Updated playbook entries:")
-    for entry in playbook.get_all_entries():
+    for entry in await playbook.get_all_entries():
         print(f"- {entry.content}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
