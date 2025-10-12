@@ -144,6 +144,37 @@ This section outlines a high-level roadmap for the future development of the ACE
 
 ### Phase 3: Deployment and Scaling
 
-- [ ] **Containerization**: Package the application using Docker for easy deployment.
+- [x] **Containerization**: The application is containerized with Docker.
 - [ ] **Cloud Deployment**: Deploy the ACE framework to a cloud platform (e.g., AWS, GCP, Azure).
 - [ ] **Scalability**: Implement a distributed architecture to handle large-scale workloads.
+
+## Deployment with Docker
+
+This project is configured to run with Docker and Docker Compose for easy and consistent deployment.
+
+### Prerequisites
+
+-   Docker
+-   Docker Compose
+
+### Running the Application
+
+1.  **Build and Run the Container:**
+
+    Use Docker Compose to build the image and run the container in detached mode:
+
+    ```bash
+    docker-compose up --build -d
+    ```
+
+2.  **Accessing the API:**
+
+    The API will be available at `http://127.0.0.1:8000`.
+
+3.  **Stopping the Application:**
+
+    To stop the running services, use:
+
+    ```bash
+    docker-compose down
+    ```
