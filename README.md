@@ -145,7 +145,7 @@ This section outlines a high-level roadmap for the future development of the ACE
 ### Phase 3: Deployment and Scaling
 
 - [x] **Containerization**: The application is containerized with Docker.
-- [ ] **Cloud Deployment**: Deploy the ACE framework to a cloud platform (e.g., AWS, GCP, Azure).
+- [x] **Cloud Deployment**: The application is ready for Kubernetes deployment.
 - [ ] **Scalability**: Implement a distributed architecture to handle large-scale workloads.
 
 ## Deployment with Docker
@@ -178,3 +178,42 @@ This project is configured to run with Docker and Docker Compose for easy and co
     ```bash
     docker-compose down
     ```
+
+## Deployment with Kubernetes
+
+The `k8s/` directory contains manifest files to deploy the ACE framework to a Kubernetes cluster.
+
+### Prerequisites
+
+-   A running Kubernetes cluster (e.g., Minikube, Docker Desktop, or a cloud provider's managed Kubernetes service).
+-   `kubectl` configured to connect to your cluster.
+
+### Running the Application
+
+1.  **Update the Image Path:**
+
+    Before you deploy, you must update the `image` field in `k8s/deployment.yaml` to point to the location where you have pushed your ACE Docker image.
+
+    ```yaml
+    # in k8s/deployment.yaml
+    image: your-docker-registry/ace-framework:latest
+    ```
+
+2.  **Apply the Manifests:**
+
+    Apply the deployment and service configurations to your cluster:
+
+    ```bash
+    kubectl apply -f k8s/deployment.yaml
+    kubectl apply -f k8s/service.yaml
+    ```
+
+3.  **Accessing the Service:**
+
+    It may take a few minutes for the cloud provider to provision the LoadBalancer. You can check the status by running:
+
+    ```bash
+    kubectl get service ace-service
+    ```
+
+    Once the `EXTERNAL-IP` is available, you can access the API at that IP address on port 80.
