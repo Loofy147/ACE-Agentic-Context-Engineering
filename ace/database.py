@@ -5,31 +5,32 @@ from typing import List, Dict
 DATABASE_PATH = "ace_playbook.db"
 
 async def initialize_database():
-    """Initializes the database by creating the playbook_entries table if it doesn't exist."""
+    """Initializes the database by creating the tables if they don't exist."""
     async with aiosqlite.connect(DATABASE_PATH) as db:
         await db.execute("""
             CREATE TABLE IF NOT EXISTS playbook_entries (
                 id TEXT PRIMARY KEY,
                 content TEXT NOT NULL UNIQUE,
-                metadata TEXT
+                metadata TEXT,
+                embedding BLOB
             )
         """)
         await db.commit()
 
-async def add_playbook_entry(entry_id: str, content: str, metadata: Dict):
+async def add_playbook_entry(entry_id: str, content: str, metadata: Dict, embedding: bytes):
     """Adds a new entry to the playbook_entries table."""
     async with aiosqlite.connect(DATABASE_PATH) as db:
         await db.execute(
-            "INSERT INTO playbook_entries (id, content, metadata) VALUES (?, ?, ?)",
-            (entry_id, content, json.dumps(metadata))
+            "INSERT INTO playbook_entries (id, content, metadata, embedding) VALUES (?, ?, ?, ?)",
+            (entry_id, content, json.dumps(metadata), embedding)
         )
         await db.commit()
 
 async def get_all_playbook_entries() -> List[Dict]:
-    """Retrieves all entries from the playbook_entries table."""
+    """Retrieves all entries and their embeddings from the playbook_entries table."""
     async with aiosqlite.connect(DATABASE_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT * FROM playbook_entries") as cursor:
+        async with db.execute("SELECT id, content, metadata, embedding FROM playbook_entries") as cursor:
             rows = await cursor.fetchall()
 
     entries = []

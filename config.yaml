@@ -9,7 +9,12 @@ language_model:
 
   mock:
     responses:
-      - '[{"content": "Mock insight 1", "metadata": {"source": "reflector", "type": "mock"}}, {"content": "Mock insight 2", "metadata": {"source": "reflector", "type": "mock"}}]'
+      - '[{"content": "Cats are independent animals.", "metadata": {"source": "reflector", "type": "mock"}}, {"content": "Dogs are loyal companions.", "metadata": {"source": "reflector", "type": "mock"}}]'
+
+# Settings for the Similarity Service
+similarity:
+  model: "all-MiniLM-L6-v2"
+  threshold: 0.80
 
 # Settings for the CLI
 cli_settings:

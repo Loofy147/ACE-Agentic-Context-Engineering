@@ -34,7 +34,7 @@ class TestAcePipeline(unittest.TestCase):
             llm = get_language_model(self.config)
             generator = Generator(llm=llm)
             reflector = Reflector(llm=llm)
-            curator = Curator()
+            curator = Curator(config=self.config)
 
             # 2. Initial state
             self.assertEqual(len(await playbook.get_all_entries()), 0)
@@ -48,8 +48,8 @@ class TestAcePipeline(unittest.TestCase):
             # 4. Assert the final state
             all_entries = await playbook.get_all_entries()
             self.assertEqual(len(all_entries), 2)
-            self.assertEqual(all_entries[0].content, "Mock insight 1")
-            self.assertEqual(all_entries[1].content, "Mock insight 2")
+            self.assertEqual(all_entries[0].content, "Cats are independent animals.")
+            self.assertEqual(all_entries[1].content, "Dogs are loyal companions.")
 
         asyncio.run(_test())
 

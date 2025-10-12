@@ -1,6 +1,7 @@
 import unittest
 import os
 import asyncio
+import yaml
 from ace.core.models import Playbook
 from ace.core.curator import Curator
 from ace import database
@@ -11,8 +12,10 @@ class TestCurator(unittest.TestCase):
     def setUp(self):
         """Set up the test configuration."""
         database.DATABASE_PATH = "test_playbook.db"
+        with open("config.yaml", "r") as f:
+            self.config = yaml.safe_load(f)
         self.playbook = Playbook()
-        self.curator = Curator()
+        self.curator = Curator(config=self.config)
 
     def tearDown(self):
         """Remove the test database after each test."""
@@ -20,21 +23,25 @@ class TestCurator(unittest.TestCase):
             os.remove(database.DATABASE_PATH)
 
     def test_deduplication(self):
-        """Ensures the curator does not add duplicate insights."""
+        """Ensures the curator does not add semantically similar insights."""
         async def _test():
             await database.initialize_database()
-            insights = [
-                {"content": "Unique insight 1", "metadata": {}},
-                {"content": "Unique insight 2", "metadata": {}},
-                {"content": "Unique insight 1", "metadata": {}},  # Duplicate
-            ]
+
+            # These two are semantically similar
+            insight1 = {"content": "How do I install Python?", "metadata": {}}
+            insight2 = {"content": "What is the process for installing Python?", "metadata": {}}
+
+            # This one is different
+            insight3 = {"content": "How do I write a function in Python?", "metadata": {}}
+
+            insights = [insight1, insight2, insight3]
 
             await self.curator.curate(self.playbook, insights)
 
             all_entries = await self.playbook.get_all_entries()
             self.assertEqual(len(all_entries), 2)
-            self.assertEqual(all_entries[0].content, "Unique insight 1")
-            self.assertEqual(all_entries[1].content, "Unique insight 2")
+            self.assertEqual(all_entries[0].content, "How do I install Python?")
+            self.assertEqual(all_entries[1].content, "How do I write a function in Python?")
 
         asyncio.run(_test())
 

@@ -52,7 +52,7 @@ async def run_ace(request: RunAceRequest):
     llm = get_language_model(config)
     generator = Generator(llm=llm)
     reflector = Reflector(llm=llm)
-    curator = Curator()
+    curator = Curator(config=config)
 
     await plugin_manager.execute_hook("on_before_generation", playbook=playbook, task=request.task)
     trajectory = await generator.generate_trajectory(playbook, request.task)

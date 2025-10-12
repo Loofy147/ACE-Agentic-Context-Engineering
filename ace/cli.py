@@ -43,7 +43,7 @@ async def main():
     llm = get_language_model(config)
     generator = Generator(llm=llm)
     reflector = Reflector(llm=llm)
-    curator = Curator()
+    curator = Curator(config=config)
 
     print(f"Running ACE pipeline for task: '{args.task}'\n")
 
