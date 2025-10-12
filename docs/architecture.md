@@ -49,6 +49,14 @@ The **Curator** and its companion, the **Similarity Service**, are responsible f
 -   **Curation Rule:** The Curator will only add the new insight if it is not semantically similar to any existing entry, based on a configurable cosine similarity threshold. This prevents conceptual redundancy.
 -   **Relation:** The Curator writes to the `Playbook` (via the database layer) after consulting the `SimilarityService`.
 
+### 2.5. Clustering and Summarization
+
+To further enhance the curation process, the ACE framework includes services for clustering and summarizing playbook entries.
+
+-   **Concept:** By grouping semantically similar entries into clusters and generating a summary for each, the system can identify higher-level concepts and themes within its knowledge base.
+-   **Implementation:** The `ClusteringService` uses KMeans to group entries based on their embeddings. The `SummarizationService` then uses a language model to generate a concise summary for each cluster. This process is orchestrated by the `ClusterManager`.
+-   **Relation:** These services operate on the data stored in the `Playbook` and provide a new layer of structured knowledge on top of the raw entries.
+
 ## 3. Integration Rules and Concepts
 
 The components are tied together by a set of well-defined integration points and rules.
