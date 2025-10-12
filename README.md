@@ -16,7 +16,7 @@ The core components are:
 - [x] **Modular Architecture**: Separate components for Generation, Reflection, and Curation.
 - [x] **Configuration-Driven**: System behavior is controlled by a `config.yaml` file.
 - [x] **Extensible Data Models**: `Playbook` and `PlaybookEntry` classes can be extended.
-- [x] **Deduplication**: The Curator prevents duplicate entries in the playbook.
+- [x] **Advanced Curation**: The Curator uses semantic similarity to prevent conceptually similar insights from being added.
 - [x] **Command-Line Interface**: A CLI for interacting with the ACE pipeline.
 - [x] **Unit Tests**: A suite of tests to ensure the robustness of the components.
 - [x] **Professional Project Structure**: The project is organized as a proper Python package.

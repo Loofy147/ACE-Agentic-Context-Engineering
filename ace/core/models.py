@@ -15,10 +15,12 @@ class PlaybookEntry:
         id: A unique identifier for the entry.
         content: The text content of the entry.
         metadata: A dictionary for storing metadata associated with the entry.
+        embedding: A byte string representing the vector embedding.
     """
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     content: str = ""
     metadata: Dict[str, any] = field(default_factory=dict)
+    embedding: Optional[bytes] = None
 
 class Playbook:
     """
@@ -36,13 +38,14 @@ class Playbook:
         """
         pass
 
-    async def add_entry(self, content: str, metadata: Optional[Dict[str, any]] = None) -> PlaybookEntry:
+    async def add_entry(self, content: str, metadata: Optional[Dict[str, any]] = None, embedding: Optional[bytes] = None) -> PlaybookEntry:
         """
         Asynchronously adds a new entry to the playbook database.
 
         Args:
             content: The content of the new entry.
             metadata: An optional dictionary of metadata for the new entry.
+            embedding: An optional byte string representing the vector embedding.
 
         Returns:
             The newly created PlaybookEntry object.
@@ -50,7 +53,7 @@ class Playbook:
         if metadata is None:
             metadata = {}
         entry = PlaybookEntry(content=content, metadata=metadata)
-        await database.add_playbook_entry(entry.id, entry.content, entry.metadata)
+        await database.add_playbook_entry(entry.id, entry.content, entry.metadata, embedding)
         return entry
 
     async def get_all_entries(self) -> List[PlaybookEntry]:
