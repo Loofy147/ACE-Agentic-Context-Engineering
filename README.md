@@ -138,7 +138,9 @@ This section outlines a high-level roadmap for the future development of the ACE
 
 - [x] **Web Interface**: A basic FastAPI is implemented. Further enhancements can be added.
 - [x] **Plugin Architecture**: A flexible plugin system has been implemented.
-- [ ] **Advanced Curation Strategies**: Implement more sophisticated curation strategies, such as clustering and summarization.
+- [ ] **Advanced Curation Strategies**:
+    - [x] Semantic Deduplication
+    - [ ] Clustering and Summarization (In Progress)
 
 ### Phase 3: Deployment and Scaling
 

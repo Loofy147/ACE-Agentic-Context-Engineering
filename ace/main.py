@@ -9,7 +9,9 @@ from ace.core.reflector import Reflector
 from ace.core.curator import Curator
 from ace.llm import get_language_model
 from ace.plugins.manager import plugin_manager
+from ace.cluster_manager import ClusterManager
 import yaml
+import asyncio
 
 app = FastAPI(
     title="ACE Framework API",
@@ -74,3 +76,22 @@ async def run_ace(request: RunAceRequest):
         new_insights=insights,
         playbook_entries=all_entries,
     )
+
+@app.post("/clusters/run", status_code=202)
+async def run_clustering_endpoint():
+    """Triggers the clustering and summarization process."""
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+    llm = get_language_model(config)
+    cluster_manager = ClusterManager(config, llm)
+    asyncio.create_task(cluster_manager.run_clustering())
+    return {"message": "Clustering and summarization process started."}
+
+@app.get("/clusters/", response_model=Dict[int, Dict])
+async def get_clusters_endpoint():
+    """Retrieves all clusters, their summaries, and their entries."""
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+    llm = get_language_model(config)
+    cluster_manager = ClusterManager(config, llm)
+    return await cluster_manager.get_clusters()
