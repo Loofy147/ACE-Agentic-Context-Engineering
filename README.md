@@ -2,6 +2,8 @@
 
 This project is a Python implementation of the Agentic Context Engineering (ACE) framework, a novel approach to building self-improving language model systems.
 
+For a deep dive into the principles, concepts, and future vision of the framework, please see the [**Architecture Document**](docs/architecture.md).
+
 ## Overview
 
 ACE treats contexts as evolving "playbooks" that accumulate, refine, and organize strategies through a modular process of generation, reflection, and curation. This implementation provides a professional, configurable, and extensible scaffold for the ACE framework.
