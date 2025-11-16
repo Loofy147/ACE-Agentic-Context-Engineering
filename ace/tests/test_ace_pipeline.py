@@ -1,7 +1,7 @@
 import unittest
-import yaml
 import os
 import asyncio
+from ace.config import settings
 from ace.core.models import Playbook
 from ace.core.generator import Generator
 from ace.core.reflector import Reflector
@@ -15,8 +15,7 @@ class TestAcePipeline(unittest.TestCase):
     def setUp(self):
         """Set up the test configuration."""
         database.DATABASE_PATH = "test_playbook.db"
-        with open("config.yaml", "r") as f:
-            self.config = yaml.safe_load(f)
+        self.config = settings
         # Ensure the test uses the mock model
         self.config['language_model']['name'] = 'mock'
 
@@ -52,6 +51,28 @@ class TestAcePipeline(unittest.TestCase):
             self.assertEqual(all_entries[1].content, "Dogs are loyal companions.")
 
         asyncio.run(_test())
+
+    def test_reflector_malformed_json(self):
+        """Tests that the Reflector handles malformed JSON gracefully."""
+        async def _test():
+            await database.initialize_database()
+            # 1. Setup
+            llm = get_language_model(self.config)
+            # Mock the LLM to return malformed JSON
+            llm.generate = unittest.mock.AsyncMock(return_value="this is not json")
+            reflector = Reflector(llm=llm)
+
+            # 2. Run reflect and assert it doesn't crash
+            trajectory = "Test trajectory"
+            with self.assertLogs('ace.core.reflector', level='WARNING') as cm:
+                insights = await reflector.reflect(trajectory)
+                self.assertEqual(insights, [])
+                self.assertEqual(len(cm.output), 1)
+                self.assertIn("Reflector received invalid JSON from LLM: this is not json", cm.output[0])
+
+
+        asyncio.run(_test())
+
 
 if __name__ == '__main__':
     unittest.main()
