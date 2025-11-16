@@ -19,7 +19,7 @@ class PlaybookEntry:
     """
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     content: str = ""
-    metadata: Dict[str, any] = field(default_factory=dict)
+    metadata: Dict[str, str] = field(default_factory=dict)
     embedding: Optional[bytes] = None
 
 class Playbook:
@@ -38,7 +38,7 @@ class Playbook:
         """
         pass
 
-    async def add_entry(self, content: str, metadata: Optional[Dict[str, any]] = None, embedding: Optional[bytes] = None) -> PlaybookEntry:
+    async def add_entry(self, content: str, metadata: Optional[Dict[str, str]] = None, embedding: Optional[bytes] = None) -> PlaybookEntry:
         """
         Asynchronously adds a new entry to the playbook database.
 
