@@ -53,5 +53,23 @@ class TestAcePipeline(unittest.TestCase):
 
         asyncio.run(_test())
 
+    def test_reflector_malformed_json(self):
+        """Tests that the Reflector handles malformed JSON gracefully."""
+        async def _test():
+            await database.initialize_database()
+            # 1. Setup
+            llm = get_language_model(self.config)
+            # Mock the LLM to return malformed JSON
+            llm.generate = unittest.mock.AsyncMock(return_value="this is not json")
+            reflector = Reflector(llm=llm)
+
+            # 2. Run reflect and assert it doesn't crash
+            trajectory = "Test trajectory"
+            insights = await reflector.reflect(trajectory)
+            self.assertEqual(insights, [])
+
+        asyncio.run(_test())
+
+
 if __name__ == '__main__':
     unittest.main()

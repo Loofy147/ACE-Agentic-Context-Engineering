@@ -62,5 +62,25 @@ class TestCurator(unittest.TestCase):
 
         asyncio.run(_test())
 
+    def test_curator_race_condition(self):
+        """Tests that the Curator handles race conditions gracefully."""
+        async def _test():
+            await database.initialize_database()
+
+            # These two are semantically similar
+            insight1 = [{"content": "How do I install Python?", "metadata": {}}]
+            insight2 = [{"content": "What is the process for installing Python?", "metadata": {}}]
+
+            # Run curate concurrently
+            await asyncio.gather(
+                self.curator.curate(self.playbook, insight1),
+                self.curator.curate(self.playbook, insight2),
+            )
+
+            all_entries = await self.playbook.get_all_entries()
+            self.assertEqual(len(all_entries), 1)
+
+        asyncio.run(_test())
+
 if __name__ == '__main__':
     unittest.main()
