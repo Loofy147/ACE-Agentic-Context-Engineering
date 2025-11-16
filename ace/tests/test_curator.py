@@ -1,7 +1,7 @@
 import unittest
 import os
 import asyncio
-import yaml
+from ace.config import settings
 from ace.core.models import Playbook
 from ace.core.curator import Curator
 from ace import database
@@ -12,8 +12,7 @@ class TestCurator(unittest.TestCase):
     def setUp(self):
         """Set up the test configuration."""
         database.DATABASE_PATH = "test_playbook.db"
-        with open("config.yaml", "r") as f:
-            self.config = yaml.safe_load(f)
+        self.config = settings
         self.playbook = Playbook()
         self.curator = Curator(config=self.config)
 
@@ -59,6 +58,26 @@ class TestCurator(unittest.TestCase):
             all_entries = await self.playbook.get_all_entries()
             self.assertEqual(len(all_entries), 1)
             self.assertEqual(all_entries[0].content, "A valid insight")
+
+        asyncio.run(_test())
+
+    def test_curator_race_condition(self):
+        """Tests that the Curator handles race conditions gracefully."""
+        async def _test():
+            await database.initialize_database()
+
+            # These two are semantically similar
+            insight1 = [{"content": "How do I install Python?", "metadata": {}}]
+            insight2 = [{"content": "What is the process for installing Python?", "metadata": {}}]
+
+            # Run curate concurrently
+            await asyncio.gather(
+                self.curator.curate(self.playbook, insight1),
+                self.curator.curate(self.playbook, insight2),
+            )
+
+            all_entries = await self.playbook.get_all_entries()
+            self.assertEqual(len(all_entries), 1)
 
         asyncio.run(_test())
 
