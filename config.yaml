@@ -19,3 +19,9 @@ similarity:
 # Settings for the CLI
 cli_settings:
   default_task: "Default task from config"
+
+# API Security
+security:
+  api_keys:
+    - "test-key-1"
+    - "test-key-2"

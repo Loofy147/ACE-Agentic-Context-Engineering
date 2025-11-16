@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 from typing import List, Dict
 
@@ -19,6 +20,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+async def get_api_key(api_key: str = Security(api_key_header)):
+    """Dependency to validate the API key."""
+    if api_key not in settings["security"]["api_keys"]:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    return api_key
+
+
 class RunAceRequest(BaseModel):
     task: str
 
@@ -36,13 +46,13 @@ async def root():
     """A simple root endpoint to confirm the API is running."""
     return {"message": "Welcome to the ACE Framework API!"}
 
-@app.get("/playbook/", response_model=List[PlaybookEntry])
+@app.get("/playbook/", response_model=List[PlaybookEntry], dependencies=[Depends(get_api_key)])
 async def get_playbook():
     """Retrieves all entries from the playbook."""
     playbook = Playbook()
     return await playbook.get_all_entries()
 
-@app.post("/run-ace/", response_model=RunAceResponse)
+@app.post("/run-ace/", response_model=RunAceResponse, dependencies=[Depends(get_api_key)])
 async def run_ace(request: RunAceRequest):
     """Runs the full ACE pipeline for a given task."""
     await plugin_manager.execute_hook("on_pipeline_start", task=request.task)
@@ -74,7 +84,7 @@ async def run_ace(request: RunAceRequest):
         playbook_entries=all_entries,
     )
 
-@app.post("/clusters/run", status_code=202)
+@app.post("/clusters/run", status_code=202, dependencies=[Depends(get_api_key)])
 async def run_clustering_endpoint():
     """Triggers the clustering and summarization process."""
     llm = get_language_model(settings)
@@ -82,7 +92,7 @@ async def run_clustering_endpoint():
     asyncio.create_task(cluster_manager.run_clustering())
     return {"message": "Clustering and summarization process started."}
 
-@app.get("/clusters/", response_model=Dict[int, Dict])
+@app.get("/clusters/", response_model=Dict[int, Dict], dependencies=[Depends(get_api_key)])
 async def get_clusters_endpoint():
     """Retrieves all clusters, their summaries, and their entries."""
     llm = get_language_model(settings)
