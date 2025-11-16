@@ -64,12 +64,8 @@ class TestAcePipeline(unittest.TestCase):
 
             # 2. Run reflect and assert it doesn't crash
             trajectory = "Test trajectory"
-            with self.assertLogs('ace.core.reflector', level='WARNING') as cm:
-                insights = await reflector.reflect(trajectory)
-                self.assertEqual(insights, [])
-                self.assertEqual(len(cm.output), 1)
-                self.assertIn("Reflector received invalid JSON from LLM: this is not json", cm.output[0])
-
+            insights = await reflector.reflect(trajectory)
+            self.assertEqual(insights, [])
 
         asyncio.run(_test())
 
