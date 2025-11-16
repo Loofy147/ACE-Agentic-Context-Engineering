@@ -1,7 +1,7 @@
 import unittest
 import os
 import asyncio
-import yaml
+from ace.config import settings
 from ace.core.models import Playbook
 from ace.core.curator import Curator
 from ace import database
@@ -12,8 +12,7 @@ class TestCurator(unittest.TestCase):
     def setUp(self):
         """Set up the test configuration."""
         database.DATABASE_PATH = "test_playbook.db"
-        with open("config.yaml", "r") as f:
-            self.config = yaml.safe_load(f)
+        self.config = settings
         self.playbook = Playbook()
         self.curator = Curator(config=self.config)
 

@@ -1,6 +1,9 @@
 from typing import Dict, List
 import json
 from ace.llm import LanguageModel
+from ace.logger import get_logger
+
+logger = get_logger(__name__)
 
 class Reflector:
     """

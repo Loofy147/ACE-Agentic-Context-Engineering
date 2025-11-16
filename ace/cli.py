@@ -1,12 +1,12 @@
 import argparse
 import sys
 import os
-import yaml
 import asyncio
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from ace.config import settings
 from ace.core.models import Playbook
 from ace.core.generator import Generator
 from ace.core.reflector import Reflector
@@ -16,22 +16,8 @@ from ace import database
 from ace.plugins.manager import plugin_manager
 from ace.cluster_manager import ClusterManager
 
-def load_config():
-    """Loads the configuration from config.yaml."""
-    try:
-        with open("config.yaml", "r") as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        print("Error: config.yaml not found. Please create it.", file=sys.stderr)
-        sys.exit(1)
-    except yaml.YAMLError as e:
-        print(f"Error parsing config.yaml: {e}", file=sys.stderr)
-        sys.exit(1)
-
 async def main():
     """Main async function for the ACE CLI."""
-    config = load_config()
-
     # Initialize the database
     await database.initialize_database()
 
@@ -40,7 +26,7 @@ async def main():
 
     # Sub-parser for the 'run' command
     run_parser = subparsers.add_parser("run", help="Run the ACE pipeline on a task.")
-    run_parser.add_argument("task", type=str, nargs='?', default=config.get('cli_settings', {}).get('default_task'), help="The task to run the ACE pipeline on.")
+    run_parser.add_argument("task", type=str, nargs='?', default=settings.get('cli_settings', {}).get('default_task'), help="The task to run the ACE pipeline on.")
 
     # Sub-parser for the 'cluster' command
     cluster_parser = subparsers.add_parser("cluster", help="Manage clusters.")
@@ -50,13 +36,13 @@ async def main():
 
     args = parser.parse_args()
 
-    llm = get_language_model(config)
+    llm = get_language_model(settings)
 
     if args.command == "run":
         playbook = Playbook()
         generator = Generator(llm=llm)
         reflector = Reflector(llm=llm)
-        curator = Curator(config=config)
+        curator = Curator(config=settings)
 
         print(f"Running ACE pipeline for task: '{args.task}'\n")
 
@@ -81,7 +67,7 @@ async def main():
             print(f"- {entry.content}")
 
     elif args.command == "cluster":
-        cluster_manager = ClusterManager(config, llm)
+        cluster_manager = ClusterManager(settings, llm)
         if args.cluster_command == "run":
             print("Running clustering and summarization...")
             await cluster_manager.run_clustering()

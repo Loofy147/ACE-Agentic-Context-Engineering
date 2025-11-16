@@ -10,7 +10,7 @@ from ace.core.curator import Curator
 from ace.llm import get_language_model
 from ace.plugins.manager import plugin_manager
 from ace.cluster_manager import ClusterManager
-import yaml
+from ace.config import settings
 import asyncio
 
 app = FastAPI(
@@ -47,14 +47,11 @@ async def run_ace(request: RunAceRequest):
     """Runs the full ACE pipeline for a given task."""
     await plugin_manager.execute_hook("on_pipeline_start", task=request.task)
 
-    with open("config.yaml", "r") as f:
-        config = yaml.safe_load(f)
-
     playbook = Playbook()
-    llm = get_language_model(config)
+    llm = get_language_model(settings)
     generator = Generator(llm=llm)
     reflector = Reflector(llm=llm)
-    curator = Curator(config=config)
+    curator = Curator(config=settings)
 
     await plugin_manager.execute_hook("on_before_generation", playbook=playbook, task=request.task)
     trajectory = await generator.generate_trajectory(playbook, request.task)
@@ -80,18 +77,14 @@ async def run_ace(request: RunAceRequest):
 @app.post("/clusters/run", status_code=202)
 async def run_clustering_endpoint():
     """Triggers the clustering and summarization process."""
-    with open("config.yaml", "r") as f:
-        config = yaml.safe_load(f)
-    llm = get_language_model(config)
-    cluster_manager = ClusterManager(config, llm)
+    llm = get_language_model(settings)
+    cluster_manager = ClusterManager(settings, llm)
     asyncio.create_task(cluster_manager.run_clustering())
     return {"message": "Clustering and summarization process started."}
 
 @app.get("/clusters/", response_model=Dict[int, Dict])
 async def get_clusters_endpoint():
     """Retrieves all clusters, their summaries, and their entries."""
-    with open("config.yaml", "r") as f:
-        config = yaml.safe_load(f)
-    llm = get_language_model(config)
-    cluster_manager = ClusterManager(config, llm)
+    llm = get_language_model(settings)
+    cluster_manager = ClusterManager(settings, llm)
     return await cluster_manager.get_clusters()

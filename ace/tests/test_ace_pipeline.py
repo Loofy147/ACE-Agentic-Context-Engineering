@@ -1,7 +1,7 @@
 import unittest
-import yaml
 import os
 import asyncio
+from ace.config import settings
 from ace.core.models import Playbook
 from ace.core.generator import Generator
 from ace.core.reflector import Reflector
@@ -15,8 +15,7 @@ class TestAcePipeline(unittest.TestCase):
     def setUp(self):
         """Set up the test configuration."""
         database.DATABASE_PATH = "test_playbook.db"
-        with open("config.yaml", "r") as f:
-            self.config = yaml.safe_load(f)
+        self.config = settings
         # Ensure the test uses the mock model
         self.config['language_model']['name'] = 'mock'
 

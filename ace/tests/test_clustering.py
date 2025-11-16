@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import asyncio
 import os
-import yaml
+from ace.config import settings
 from ace.clustering import ClusteringService
 from ace.summarization import SummarizationService
 from ace.cluster_manager import ClusterManager
@@ -16,10 +16,11 @@ class TestClusteringFeatures(unittest.TestCase):
     def setUp(self):
         """Set up a dummy config and clean database for each test."""
         database.DATABASE_PATH = "test_playbook.db"
-        self.config = {
+        self.config = settings.copy()
+        self.config.update({
             'clustering': {'n_clusters': 2},
             'language_model': {'name': 'mock', 'mock': {'responses': ['Summary of cluster']}}
-        }
+        })
         self.clustering_service = ClusteringService(self.config)
         self.llm = get_language_model(self.config)
         self.summarization_service = SummarizationService(self.llm)
