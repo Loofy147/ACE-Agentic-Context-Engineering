@@ -1,6 +1,9 @@
 from typing import Dict, List
 import json
 from ace.llm import LanguageModel
+from ace.logger import get_logger
+
+logger = get_logger(__name__)
 
 class Reflector:
     """
@@ -46,6 +49,7 @@ class Reflector:
             insights = json.loads(response_text)
         except json.JSONDecodeError:
             # Handle cases where the LLM response is not valid JSON
-            insights = [{"content": response_text, "metadata": {"source": "reflector", "error": "invalid_json"}}]
+            logger.warning(f"Reflector received invalid JSON from LLM: {response_text}")
+            insights = []
 
         return insights
