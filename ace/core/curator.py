@@ -35,17 +35,13 @@ class Curator:
                       insight is a dictionary with 'content' and 'metadata'.
         """
         async with self.lock:
-            all_entries = await playbook.get_all_entries()
-            existing_embeddings = [np.frombuffer(e.embedding, dtype=np.float32) for e in all_entries if e.embedding]
-
             for insight in insights:
                 content = insight.get("content", "")
                 if content and not await database.content_exists(content):
                     embedding = self.similarity_service.get_embedding(content)
-                    if not self.similarity_service.is_similar(embedding, existing_embeddings):
+                    if not await database.is_similar_embedding_present(self.similarity_service, embedding):
                         await playbook.add_entry(
                             content=content,
                             metadata=insight.get("metadata", {}),
                             embedding=embedding.tobytes()
                         )
-                        existing_embeddings.append(embedding)
