@@ -1,7 +1,11 @@
 import aiosqlite
 import json
-from typing import List, Dict
+from typing import List, Dict, TYPE_CHECKING
 import collections
+import numpy as np
+
+if TYPE_CHECKING:
+    from ace.similarity import SimilarityService
 
 DATABASE_PATH = "ace_playbook.db"
 
@@ -66,6 +70,44 @@ async def add_or_update_cluster_summary(cluster_id: int, summary: str):
     async with aiosqlite.connect(DATABASE_PATH) as db:
         await db.execute("INSERT OR REPLACE INTO clusters (id, summary) VALUES (?, ?)", (cluster_id, summary))
         await db.commit()
+
+async def is_similar_embedding_present(
+    similarity_service: 'SimilarityService',
+    embedding: np.ndarray,
+    batch_size: int = 100
+) -> bool:
+    """
+    Checks if a similar embedding exists in the database, processing in batches.
+
+    Args:
+        similarity_service: The similarity service to use for the check.
+        embedding: The embedding to check for similarity.
+        batch_size: The number of embeddings to fetch from the DB at a time.
+
+    Returns:
+        True if a similar embedding is found, False otherwise.
+    """
+    offset = 0
+    while True:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute(
+                "SELECT embedding FROM playbook_entries WHERE embedding IS NOT NULL LIMIT ? OFFSET ?",
+                (batch_size, offset)
+            ) as cursor:
+                rows = await cursor.fetchall()
+
+        if not rows:
+            break
+
+        existing_embeddings = [np.frombuffer(row['embedding'], dtype=np.float32) for row in rows]
+        if similarity_service.is_similar(embedding, existing_embeddings):
+            return True
+
+        offset += batch_size
+
+    return False
+
 
 async def get_all_clusters_with_entries() -> Dict[int, Dict]:
     """Retrieves all clusters, their summaries, and their associated entries."""

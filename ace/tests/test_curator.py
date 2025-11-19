@@ -1,6 +1,7 @@
 import unittest
 import os
 import asyncio
+from unittest.mock import patch, AsyncMock
 from ace.config import settings
 from ace.core.models import Playbook
 from ace.core.curator import Curator
@@ -78,6 +79,34 @@ class TestCurator(unittest.TestCase):
 
             all_entries = await self.playbook.get_all_entries()
             self.assertEqual(len(all_entries), 1)
+
+        asyncio.run(_test())
+
+    @patch('ace.database.is_similar_embedding_present', new_callable=AsyncMock)
+    def test_batched_similarity_check(self, mock_is_similar):
+        """
+        Tests that the Curator uses the optimized batched similarity check.
+        """
+        async def _test():
+            await database.initialize_database()
+
+            # The mock will return True for the first call (similar) and False for the second (not similar).
+            mock_is_similar.side_effect = [True, False]
+
+            insights = [
+                {"content": "Insight 1", "metadata": {}},
+                {"content": "Insight 2", "metadata": {}},
+            ]
+
+            await self.curator.curate(self.playbook, insights)
+
+            # Check that is_similar_embedding_present was called twice
+            self.assertEqual(mock_is_similar.call_count, 2)
+
+            # Check that only the non-similar insight was added
+            all_entries = await self.playbook.get_all_entries()
+            self.assertEqual(len(all_entries), 1)
+            self.assertEqual(all_entries[0].content, "Insight 2")
 
         asyncio.run(_test())
 
