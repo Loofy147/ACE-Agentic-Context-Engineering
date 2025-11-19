@@ -31,7 +31,11 @@ class ClusteringService:
         if not embeddings:
             return []
 
-        kmeans = KMeans(n_clusters=self.n_clusters, random_state=42, n_init=10)
+        n_clusters = self.n_clusters
+        if len(embeddings) < n_clusters:
+            n_clusters = len(embeddings)
+
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
         kmeans.fit(embeddings)
         return kmeans.labels_
 

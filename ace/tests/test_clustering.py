@@ -57,6 +57,18 @@ class TestClusteringFeatures(unittest.TestCase):
             self.assertEqual(summary, "Summary of cluster")
         asyncio.run(_test())
 
+    def test_clustering_with_fewer_entries_than_clusters(self):
+        """Tests that clustering works when there are fewer entries than clusters."""
+        # Create a single dummy embedding
+        embeddings = [np.array([1.0, 1.0, 1.0])]
+        entries = [{'embedding': e.tobytes()} for e in embeddings]
+
+        # n_clusters is 2 in the config, but we only have 1 entry
+        labels = self.clustering_service.cluster_entries(entries)
+
+        # The test passes if no ValueError is raised and a label is returned
+        self.assertEqual(len(labels), 1)
+
     def test_cluster_manager(self):
         """Tests the full clustering and summarization process."""
         async def _test():
