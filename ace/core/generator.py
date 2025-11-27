@@ -5,17 +5,24 @@ class Generator:
     """
     The Generator component of the ACE framework.
 
-    The Generator is responsible for generating a reasoning trajectory for a given
-    task, using the current playbook as context. This trajectory outlines the
-    steps to be taken to address the task.
+    The Generator is the creative engine of the framework. Its primary
+    responsibility is to generate a "reasoning trajectory" for a given task.
+    This trajectory is a detailed, step-by-step plan that outlines how to
+    approach the task, leveraging the accumulated knowledge stored in the
+    playbook.
+
+    The generation process is guided by a language model, which takes the
+    current task and the contents of the playbook as input to produce a
+    relevant and actionable trajectory.
     """
 
     def __init__(self, llm: LanguageModel):
         """
-        Initializes the Generator with a language model.
+        Initializes the Generator.
 
         Args:
-            llm: An instance of a class that implements the LanguageModel interface.
+            llm: An instance of a class that implements the `LanguageModel`
+                 interface. This model is used to generate the trajectories.
         """
         self.llm = llm
 
@@ -23,15 +30,16 @@ class Generator:
         """
         Asynchronously generates a reasoning trajectory for a given task.
 
-        This method constructs a prompt from the task and playbook, then uses
-        the language model to generate a reasoning trajectory.
+        This method constructs a comprehensive prompt that includes the current
+        task and all the entries from the playbook. This prompt is then passed
+        to the language model to generate the reasoning trajectory.
 
         Args:
-            playbook: The playbook to use as context for the language model.
+            playbook: The playbook to be used as context for the language model.
             task: The task for which to generate a reasoning trajectory.
 
         Returns:
-            A string representing the reasoning trajectory.
+            A string representing the generated reasoning trajectory.
         """
         prompt = f"Task: {task}\n\nPlaybook:\n"
         for entry in await playbook.get_all_entries():
