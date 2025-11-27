@@ -25,6 +25,7 @@ The core components are:
 - [x] **Persistent Storage**: The playbook is stored in a SQLite database.
 - [x] **Asynchronous Operations**: The entire pipeline is built with `asyncio` for performance.
 - [x] **Pluggable Language Models**: A modular architecture for swapping language models.
+- [x] **Self-Healing**: A mechanism to automatically detect and correct outdated or incorrect entries in the playbook.
 
 ## Getting Started
 
@@ -123,6 +124,37 @@ The `PluginManager` will automatically discover and register any valid plugin cl
 ### Example Plugin
 
 The `ace/plugins/logging_plugin.py` provides a simple example of a plugin that logs each stage of the pipeline.
+
+## Self-Healing
+
+The ACE framework includes a self-healing mechanism that automatically reviews and corrects playbook entries to ensure they remain accurate and relevant over time. This process is handled by the `SelfHealing` component, which can be triggered via an API endpoint.
+
+### Triggering Self-Healing
+
+To start the self-healing process, you can send a POST request to the `/self-heal/` endpoint. This will initiate a background task that analyzes and corrects the playbook entries.
+
+```bash
+curl -X POST "http://127.0.0.1:8000/self-heal/" -H "X-API-Key: your-api-key"
+```
+
+## API Reference
+
+The ACE framework provides a RESTful API for interacting with the system.
+
+### Authentication
+
+All API endpoints are protected with an API key. You must include your API key in the `X-API-Key` header of your requests.
+
+### Endpoints
+
+- **`GET /`**: A simple root endpoint to confirm the API is running.
+- **`GET /playbook/`**: Retrieves all entries from the playbook.
+- **`POST /run-ace/`**: Runs the full ACE pipeline for a given task.
+  - **Request Body**: `{"task": "Your task here"}`
+  - **Response Body**: `{"new_insights": [...], "playbook_entries": [...]}`
+- **`POST /clusters/run`**: Triggers the clustering and summarization process.
+- **`GET /clusters/`**: Retrieves all clusters, their summaries, and their entries.
+- **`POST /self-heal/`**: Triggers the self-healing process.
 
 ## Next Steps: High-Tech Level
 
