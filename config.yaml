@@ -23,6 +23,18 @@ similarity:
 cli_settings:
   default_task: "Default task from config"
 
+# Database Configuration
+database:
+  type: "sqlite"  # Can be "sqlite" or "postgres"
+  sqlite:
+    path: "ace_playbook.db"
+  postgres:
+    user: "postgres"
+    password: "password"
+    host: "localhost"
+    port: 5432
+    database: "ace_playbook"
+
 # API Security
 security:
   api_keys:

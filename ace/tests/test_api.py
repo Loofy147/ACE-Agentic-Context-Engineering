@@ -4,34 +4,40 @@ import asyncio
 from fastapi.testclient import TestClient
 from ace.main import app
 from ace import database
+from ace.config import settings
 
 class TestApiSecurity(unittest.TestCase):
     """
     Tests for the API security layer.
-
-    This test suite ensures that the API endpoints are properly secured with
-    API key authentication. It checks that requests without a valid API key
-    are rejected, and requests with a valid key are accepted.
     """
+    DB_PATH = "test_api_playbook.db"
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         """
-        Set up the test environment.
+        Set up the test environment for the entire class.
+        """
+        settings['database'] = {
+            'type': 'sqlite',
+            'sqlite': {
+                'path': cls.DB_PATH
+            }
+        }
+        if os.path.exists(cls.DB_PATH):
+            os.remove(cls.DB_PATH)
 
-        Initializes a test database and a TestClient for the FastAPI app.
-        """
-        database.DATABASE_PATH = "test_api_playbook.db"
+        asyncio.run(database.db_connect())
         asyncio.run(database.initialize_database())
-        self.client = TestClient(app)
+        cls.client = TestClient(app)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         """
-        Clean up the test environment.
-
-        Removes the test database file after each test.
+        Clean up the test environment for the entire class.
         """
-        if os.path.exists(database.DATABASE_PATH):
-            os.remove(database.DATABASE_PATH)
+        asyncio.run(database.db_close())
+        if os.path.exists(cls.DB_PATH):
+            os.remove(cls.DB_PATH)
 
     def test_no_api_key(self):
         """

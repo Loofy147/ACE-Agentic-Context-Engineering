@@ -62,9 +62,17 @@ class RunAceResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """
-    Initializes the database when the application starts.
+    Initializes the database connection and tables when the application starts.
     """
+    await database.db_connect()
     await database.initialize_database()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    Closes the database connection when the application shuts down.
+    """
+    await database.db_close()
 
 @app.get("/")
 async def root():

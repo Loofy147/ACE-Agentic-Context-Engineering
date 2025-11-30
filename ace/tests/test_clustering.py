@@ -13,46 +13,45 @@ from ace.core.models import Playbook
 class TestClusteringFeatures(unittest.TestCase):
     """
     Tests for the clustering and summarization features.
-
-    This test suite covers the `ClusteringService`, `SummarizationService`,
-    and the `ClusterManager` to ensure that playbook entries are correctly
-    grouped and summarized.
     """
+    DB_PATH = "test_playbook.db"
 
     def setUp(self):
         """
         Set up the test environment.
-
-        Initializes a test database, a mock configuration, and the services
-        needed for clustering and summarization.
         """
-        database.DATABASE_PATH = "test_playbook.db"
-        self.config = settings.copy()
-        self.config.update({
+        settings['database'] = {
+            'type': 'sqlite',
+            'sqlite': {
+                'path': self.DB_PATH
+            }
+        }
+        settings.update({
             'clustering': {'n_clusters': 2},
             'language_model': {'name': 'mock', 'mock': {'responses': ['Summary of cluster']}}
         })
-        self.clustering_service = ClusteringService(self.config)
-        self.llm = get_language_model(self.config)
+        if os.path.exists(self.DB_PATH):
+            os.remove(self.DB_PATH)
+
+        asyncio.run(database.db_connect())
+        asyncio.run(database.initialize_database())
+
+        self.clustering_service = ClusteringService(settings)
+        self.llm = get_language_model(settings)
         self.summarization_service = SummarizationService(self.llm)
         self.playbook = Playbook()
 
     def tearDown(self):
         """
         Clean up the test environment.
-
-        Removes the test database file after each test.
         """
-        if os.path.exists(database.DATABASE_PATH):
-            os.remove(database.DATABASE_PATH)
+        asyncio.run(database.db_close())
+        if os.path.exists(self.DB_PATH):
+            os.remove(self.DB_PATH)
 
     def test_clustering_service(self):
         """
         Tests the basic functionality of the ClusteringService.
-
-        Verifies that entries with similar embeddings are grouped into the
-        same cluster, and entries with dissimilar embeddings are in different
-        clusters.
         """
         embeddings = [
             np.array([1.0, 1.0, 1.0]), np.array([1.1, 1.0, 1.1]),
@@ -68,9 +67,6 @@ class TestClusteringFeatures(unittest.TestCase):
     def test_summarization_service(self):
         """
         Tests the basic functionality of the SummarizationService.
-
-        Ensures that the service can generate a summary for a list of texts
-        using the mock language model.
         """
         async def _test():
             texts = ["This is the first text.", "This is the second text."]
@@ -91,14 +87,8 @@ class TestClusteringFeatures(unittest.TestCase):
     def test_cluster_manager(self):
         """
         Tests the end-to-end clustering and summarization process.
-
-        This test verifies that the `ClusterManager` can successfully
-        orchestrate the clustering of playbook entries and the generation of
-        summaries for each cluster.
         """
         async def _test():
-            await database.initialize_database()
-
             # Add entries with distinct embeddings
             embedding1 = np.array([1.0, 1.0, 1.0]).tobytes()
             embedding2 = np.array([-1.0, -1.0, -1.0]).tobytes()
@@ -106,7 +96,7 @@ class TestClusteringFeatures(unittest.TestCase):
             await self.playbook.add_entry("Entry 2", {}, embedding2)
 
             # Run the clustering and summarization process
-            manager = ClusterManager(self.config, self.llm)
+            manager = ClusterManager(settings, self.llm)
             await manager.run_clustering()
 
             # Verify the results

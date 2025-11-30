@@ -13,36 +13,46 @@ class TestSelfHealing(unittest.TestCase):
     """
     Tests for the SelfHealing component.
     """
+    DB_PATH = "test_playbook.db"
 
     def setUp(self):
         """
         Set up the test environment.
         """
-        database.DATABASE_PATH = "test_playbook.db"
-        self.config = settings
-        self.config['language_model']['name'] = 'mock'
+        settings['database'] = {
+            'type': 'sqlite',
+            'sqlite': {
+                'path': self.DB_PATH
+            }
+        }
+        settings['language_model']['name'] = 'mock'
+        if os.path.exists(self.DB_PATH):
+            os.remove(self.DB_PATH)
+
+        asyncio.run(database.db_connect())
+        asyncio.run(database.initialize_database())
+
         self.playbook = Playbook()
-        self.similarity_service = get_similarity_service(self.config)
+        self.similarity_service = get_similarity_service(settings)
 
     def tearDown(self):
         """
         Clean up the test environment.
         """
-        if os.path.exists(database.DATABASE_PATH):
-            os.remove(database.DATABASE_PATH)
+        asyncio.run(database.db_close())
+        if os.path.exists(self.DB_PATH):
+            os.remove(self.DB_PATH)
 
     def test_analyze_and_correct(self):
         """
         Tests that the self-healing process can correct an outdated entry.
         """
         async def _test():
-            await database.initialize_database()
-
             # Add an outdated entry to the playbook
             entry = await self.playbook.add_entry("Old content", {})
 
             # Setup the mock LLM to return a corrected version
-            llm = get_language_model(self.config)
+            llm = get_language_model(settings)
             llm.generate = AsyncMock(return_value="New content")
 
             # Run the self-healing process

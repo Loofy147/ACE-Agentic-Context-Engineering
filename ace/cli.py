@@ -28,10 +28,12 @@ async def main():
     - `run`: Executes the full ACE pipeline for a given task.
     - `cluster`: Manages the clustering and summarization of playbook entries.
     """
-    await database.initialize_database()
+    await database.db_connect()
+    try:
+        await database.initialize_database()
 
-    parser = argparse.ArgumentParser(description="ACE Framework Command-Line Interface")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+        parser = argparse.ArgumentParser(description="ACE Framework Command-Line Interface")
+        subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Sub-parser for the 'run' command
     run_parser = subparsers.add_parser("run", help="Execute the ACE pipeline for a given task.")
@@ -95,6 +97,8 @@ async def main():
                 print("Entries:")
                 for entry in data['entries']:
                     print(f"  - {entry['content']}")
+    finally:
+        await database.db_close()
 
 if __name__ == "__main__":
     asyncio.run(main())

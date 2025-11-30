@@ -1,0 +1,38 @@
+# ACE Framework: Risk Register & Mitigation Table
+
+This document provides a detailed register of the risks identified in the `gap_analysis.md` document, along with their likelihood, impact, and a specific, actionable mitigation plan.
+
+-   **Likelihood/Impact Scale:** 1 (Low), 2 (Medium), 3 (High)
+
+---
+
+## Technical Risks
+
+| ID  | Risk Description                       | Likelihood (1-3) | Impact (1-3) | Risk Score (L*I) | Mitigation Plan                                                                                                                                                                                             | Owner(s)                 |
+| --- | -------------------------------------- | ---------------- | ------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| T01 | **Scalability Bottlenecks**            | 3                | 3            | 9                | **Mitigation:** Execute the phased transition to a microservices architecture as outlined in the roadmap. Prioritize the externalization of the database and the decomposition of the `Similarity Service`. | Engineering (Infra)      |
+| T02 | **Lack of Fault Tolerance**            | 3                | 3            | 9                | **Mitigation:** Implement health checks for all services. Deploy services with multiple replicas in the Kubernetes cluster. Design for graceful degradation where possible.                               | Engineering (Platform)   |
+| T03 | **Inadequate Security Measures**       | 3                | 3            | 9                | **Mitigation:** Implement a secure secret management solution. Introduce RBAC. Conduct regular security audits. Follow the principle of least privilege for all system components.                       | Engineering (Security)   |
+| T04 | **Limited Observability**              | 3                | 3            | 9                | **Mitigation:** Implement the full observability stack as planned in the roadmap: structured logging, monitoring with Prometheus/Grafana, and distributed tracing with Jaeger.                           | DevOps, Engineering      |
+| T05 | **No Formal Testing Strategy**         | 3                | 2            | 6                | **Mitigation:** Develop a formal testing strategy that includes unit, integration, and end-to-end tests. Mandate a minimum code coverage threshold for all new code.                                        | Engineering (QA)         |
+| T06 | **Dependency on Mock LLM**             | 3                | 2            | 6                | **Mitigation:** Develop a robust integration with a real LLM, including strategies for managing API keys, costs, and latency. Implement a circuit breaker to handle LLM API failures.                 | Engineering (AI/ML)      |
+
+## Operational Risks
+
+| ID  | Risk Description                       | Likelihood (1-3) | Impact (1-3) | Risk Score (L*I) | Mitigation Plan                                                                                                                                                                                             | Owner(s)                 |
+| --- | -------------------------------------- | ---------------- | ------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| O01 | **No CI/CD Pipeline**                  | 3                | 3            | 9                | **Mitigation:** Implement the CI/CD pipeline as a top priority in Q1. Ensure that all deployments to production are fully automated and require a manual approval step.                                  | DevOps                   |
+| O02 | **Manual Infrastructure Management**   | 3                | 2            | 6                | **Mitigation:** Implement Infrastructure as Code (IaC) using Terraform. All changes to infrastructure should be made through code and reviewed via pull requests.                                         | DevOps                   |
+| O03 | **No Database Management Strategy**    | 3                | 3            | 9                | **Mitigation:** Implement automated, regular backups of the production database. Develop and test a disaster recovery plan for the database. Use a tool like Alembic for schema migrations.                | DevOps, Engineering      |
+| O04 | **Lack of Incident Response Plan**     | 3                | 3            | 9                | **Mitigation:** Develop and document a formal incident response plan. Establish on-call rotations and conduct regular incident response drills.                                                         | DevOps, Engineering      |
+| O05 | **Configuration Sprawl**               | 2                | 2            | 4                | **Mitigation:** Use a centralized configuration management system (e.g., Kubernetes ConfigMaps and Secrets, managed by Helm) to manage configuration across different environments.                        | DevOps                   |
+
+## Legal & Compliance Risks
+
+| ID  | Risk Description                       | Likelihood (1-3) | Impact (1-3) | Risk Score (L*I) | Mitigation Plan                                                                                                                                                                                             | Owner(s)                 |
+| --- | -------------------------------------- | ---------------- | ------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| L01 | **No Data Privacy Considerations**     | 3                | 3            | 9                | **Mitigation:** Engage with legal counsel to develop a comprehensive data privacy policy. Implement features to support data subject rights (e.g., data export and deletion).                             | Legal, Product, Eng      |
+| L02 | **Lack of Audit Trails**               | 3                | 3            | 9                | **Mitigation:** Implement a dedicated audit logging service that securely stores all significant user and system actions. Ensure that audit logs are immutable and retained for a sufficient period.         | Engineering (Platform)   |
+| L03 | **Uncertain Third-Party Licensing**    | 2                | 3            | 6                | **Mitigation:** Conduct a thorough audit of all third-party dependencies and their licenses. Establish a process for reviewing and approving all new dependencies.                                        | Legal, Engineering       |
+| L04 | **No Terms of Service or Privacy Policy** | 3                | 3            | 9                | **Mitigation:** Draft and publish a clear and comprehensive Terms of Service and Privacy Policy before the system is made publicly available.                                                         | Legal, Product           |
+| L05 | **No Formal Security Review**          | 3                | 3            | 9                | **Mitigation:** Schedule and conduct a third-party security audit and penetration test as a key deliverable in Q4. Create a process for regularly reviewing and remediating security vulnerabilities. | Engineering (Security)   |
